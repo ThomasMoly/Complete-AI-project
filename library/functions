@@ -1,0 +1,22 @@
+# main.py (simplified example)
+def load_words(filepath="words.txt"):
+    """Load all words from a file into a Python set."""
+    with open(filepath, "r", encoding="utf-8") as f:
+        return set(word.strip().lower() for word in f if word.strip())
+
+def remove_common_words_from_resume(resume_text, common_words_file="words.txt"):
+    # Load list of filler/common words
+    with open(common_words_file, "r") as f:
+        common_words = set(word.strip().lower() for word in f.readlines())
+
+    # Split the resume into words, normalize to lowercase
+    words = resume_text.split()
+
+    # Keep only words not in common list
+    filtered_words = [w for w in words if w.lower() not in common_words]
+
+    # Recombine into cleaned text
+    cleaned_resume = " ".join(filtered_words)
+
+    return cleaned_resume
+
