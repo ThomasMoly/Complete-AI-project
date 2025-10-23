@@ -6,6 +6,12 @@ from typing import List
 import fitz
 from transformers import pipeline
 from pydantic import BaseModel
+from google import genai
+import os
+
+client = genai.Client(api_key = "AIzaSyByAq7OTtdMQrZDEm2cxyOU-ao_Uo8_Co0")
+
+
 
 # main.py (simplified example)
 def load_words(filepath="words.txt"):
@@ -60,11 +66,12 @@ async def upload_pdf(file: UploadFile = File(...)):
             .strip()
     )
     
-    prompt = f"Analyze the following resume and give 5 actionable suggestions to make it more ATS-friendly. Use bullet points.\n\n{clean_text}"
 
     words_set = load_words("words.txt")
 
     removed_common_words = remove_common_words_from_resume(clean_text, words_set)
+
+    prompt = f"Analyze the following resume and give 5 actionable suggestions to make it more ATS-friendly. Use bullet points.\n\n{removed_common_words}"
 
     skill_extractor = pipeline("ner", model="jjzha/jobbert_skill_extraction")
 
@@ -77,16 +84,23 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     print(skill_extractor(second_half))
 
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-lite",
+        contents=prompt,
+    )
+
+    print(response.text)
+
     generator = pipeline("text-generation", model="gpt2")
 
     output = generator(prompt)
 
-    generated_text = output[0]["generated_text"]
+    generated_text = response.text
 
     temp_storage['text'] = generated_text
 
 
-    return {"filename": file.filename, "message": "Upload successful", "text": output}
+    return {"filename": file.filename, "message": "Upload successful", "text": generated_text}
 
 
 @app.get("/results/", response_model=ResultResponse)

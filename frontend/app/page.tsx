@@ -5,7 +5,7 @@ export default function Home() {
     <div className="min-h-screen bg-linear-to-br from-blue-200 to-white flex flex-col items-center justify-center px-4">
       <div className="text-center mb-12">
         <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-4">
-          Welcome to ResumRater
+          Welcome to ResumeRater
         </h1>
         <p className="text-2xl md:text-3xl text-gray-700">
           Your personalized AI resume assistant
