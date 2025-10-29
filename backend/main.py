@@ -4,16 +4,46 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 import fitz
-from transformers import pipeline
 from pydantic import BaseModel
 from google import genai
-import spacy
-nlp = spacy.load("en_core_web_sm")
+import re
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 
 client = genai.Client(api_key = "AIzaSyByAq7OTtdMQrZDEm2cxyOU-ao_Uo8_Co0")
 
+def clean_and_split_feedback(generated_text: str):
+    # Remove markdown bolds, bullets, and excessive whitespace
+    text = re.sub(r"\*\*|#+", "", generated_text).strip()
 
+    # Normalize all bullets (convert "•", "-", etc. to "1." style)
+    text = re.sub(r"[\n\r]+[\-\*\•]\s*", "\n1. ", text)
+
+    # Ensure consistent numbering (Gemini sometimes omits numbers)
+    numbered_text = []
+    counter = 1
+    for line in text.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        # Detect existing numbering
+        if re.match(r"^\d+\.", line):
+            numbered_text.append(line)
+        else:
+            numbered_text.append(f"{counter}. {line}")
+            counter += 1
+
+    # Now extract each numbered suggestion cleanly
+    suggestions = re.split(r"\d+\.\s*", "\n".join(numbered_text))
+    suggestions = [s.strip() for s in suggestions if len(s.strip()) > 0]
+
+    # Optional: remove intro line if it's not an actionable suggestion
+    if suggestions and "suggestion" in suggestions[0].lower():
+        suggestions.pop(0)
+
+    return suggestions
 
 # main.py (simplified example)
 def load_words(filepath="words.txt"):
@@ -31,33 +61,35 @@ def remove_common_words_from_resume(resume_text, common_words):
 
     return cleaned_resume
 
-def extract_and_compare_keywords(resume, job):
-    doc1 = nlp(resume)
-    doc2 = nlp(job)
-    resume_keywords = {
-        token.text.lower()
-        for token in doc1
-        if token.pos_ in {"NOUN", "PROPN"} and len(token.text) > 2
-    }
+def extract_and_compare_semantic_gemini(resume_text, job_text):
+    resume_emb = [
+        np.array(e.values) for e in client.models.embed_content(
+        model="gemini-embedding-001", 
+        contents=resume_text
+    ).embeddings
+    ]
 
-    job_keywords = {
-        token.text.lower()
-        for token in doc2
-        if token.pos_ in {"NOUN", "PROPN"} and len(token.text) > 2
-    }
+    job_emb = [
+        np.array(e.values) for e in client.models.embed_content(
+        model="gemini-embedding-001",
+        contents=job_text
+    ).embeddings
+    ]
 
-    matched = resume_keywords.intersection(job_keywords)
-    missing = job_keywords - resume_keywords
+    results = resume_emb + job_emb
+    
+    embeddings_matrix = np.array(results)
+    score = cosine_similarity(embeddings_matrix)
 
-    score = round(len(matched) / len(job_keywords) * 100, 2)
-    print(score)
+    return score[0][1]
 
 class ResultResponse(BaseModel):
-    text: str
+    text: List[str]
+    matched_score: float | None = None
 
 app = FastAPI()
 
-temp_storage ={ 'text': '', 'matched_score' : ''}
+temp_storage ={ 'text': [], 'matched_score' : ''}
 
 origins = [
     "http://localhost:3000",
@@ -102,23 +134,24 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...))
 
     removed_common_words_job_posting = remove_common_words_from_resume(clean_job_posting, words_set)
 
-    match_score = extract_and_compare_keywords(removed_common_words, removed_common_words_job_posting)
+    match_score = extract_and_compare_semantic_gemini(removed_common_words, removed_common_words_job_posting)
 
-    prompt = f"Analyze the following resume and give 5 actionable suggestions to make it more ATS-friendly. Use bullet points.\n\n{contents}"
-
+    prompt = f"Analyze the following resume and give 5 actionable suggestions to make it more ATS-friendly but don't make each point too long. Use bullet points.\n\n{clean_text}. However, if there is a job posting, give more direct feedback on how the resume could improve relative to the job posting. \n\n {clean_job_posting}"
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
         contents=prompt,
     )
 
-    print(response.text)
-
     generated_text = response.text
 
-    temp_storage['text'] = generated_text
+    suggestions = clean_and_split_feedback(generated_text)
+
+    temp_storage['text'] = suggestions
+
+    temp_storage['text'] = suggestions
     temp_storage['matched_score'] = match_score
 
-    return {"filename": file.filename, "message": "Upload successful", "text": generated_text}
+    return {"filename": file.filename, "message": "Upload successful", "text": suggestions, "matched_score": match_score}
 
 
 @app.get("/results/", response_model=ResultResponse)

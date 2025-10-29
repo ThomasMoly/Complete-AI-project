@@ -11,7 +11,8 @@ const Page = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [jobPosting, setJobPosting] = useState("");
-  const [jobFile, setJobFile] = useState<File | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | undefined>(undefined);
+
 
   const handleUpload = async (file: File | undefined) => {
     if (!file) {
@@ -19,9 +20,11 @@ const Page = () => {
       return;
     }
 
+    setIsUploading(true); // ✅ Start loader
+
     const formData = new FormData();
     formData.append("file", file);
-        formData.append("job_posting", jobPosting);
+    formData.append("job_posting", jobPosting);
 
 
     try {
@@ -34,8 +37,8 @@ const Page = () => {
         throw new Error("Upload failed");
       }
 
-      
-
+      setIsUploading(false);
+      router.push("./dashboard");
     } catch (error) {
       console.error("Error uploading file:", error);
       setIsUploading(false);
@@ -43,19 +46,8 @@ const Page = () => {
     }
   };
 
-  const Continue_on = () =>{
-      router.push("./dashboard");
-  }
 
-  const handleJobFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setJobFile(file);
-      // Clear text input if file is uploaded
-      setJobPosting("");
-    }
-    
-  };
+
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-white flex flex-col items-center justify-center px-6 py-12">
@@ -84,7 +76,7 @@ const Page = () => {
                 accept=".pdf,.doc,.docx"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const file = e.target.files?.[0];
-                  handleUpload(file);
+                  setResumeFile(file);
                 }}
               />
             </form>
@@ -155,11 +147,8 @@ const Page = () => {
                   onChange={(e) => {
                     setJobPosting(e.target.value);
                     // Clear file if text is entered
-                    if (e.target.value.trim()) {
-                      setJobFile(null);
-                    }
+                    
                   }}
-                  disabled={jobFile !== null}
                   placeholder="Paste the job posting here to get tailored feedback..."
                   className="w-full h-40 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-800"
                 />
@@ -199,7 +188,7 @@ const Page = () => {
         </div>
         <div className="text-center">
           <button
-            onClick={() => Continue_on()}
+            onClick={() => handleUpload(resumeFile)}
             className="text-gray-600 hover:text-gray-800 font-semibold transition-colors duration-200 inline-flex items-center gap-2"
           >
             Continue

@@ -1,23 +1,45 @@
 import Link from "next/link";
 
+interface ResultResponse {
+  text: string[];
+  matched_score: number;
+}
+
 export default async function DashboardPage() {
   const res = await fetch("http://localhost:8000/results/", {
     cache: "no-store",
   }); 
 
-  const data = await res.json();
+  const data: ResultResponse = await res.json();
+
+  // Determine color based on score
+  const getScoreColor = (score: number) => {
+    if (score >= .80) return "bg-green-100 text-green-700 border-green-300";
+    if (score >= .60) return "bg-yellow-100 text-yellow-700 border-yellow-300";
+    return "bg-red-100 text-red-700 border-red-300";
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-white">
       <div className="max-w-4xl mx-auto px-6 py-12">
-        {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Resume Feedback
-          </h1>
-          <p className="text-gray-600">
-            AI-powered analysis and recommendations for your resume
-          </p>
+        {/* Header Section with Score */}
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">
+              Resume Feedback
+            </h1>
+            <p className="text-gray-600">
+              AI-powered analysis and recommendations for your resume
+            </p>
+          </div>
+          
+          {/* Match Score Badge */}
+          {data.matched_score !== undefined && (
+            <div className={`px-6 py-3 rounded-xl border-2 ${getScoreColor(data.matched_score)}`}>
+              <div className="text-sm font-medium opacity-80">Match Score</div>
+              <div className="text-3xl font-bold">{data.matched_score}%</div>
+            </div>
+          )}
         </div>
 
         {/* Feedback Card */}
@@ -45,8 +67,19 @@ export default async function DashboardPage() {
 
           <div className="prose prose-lg max-w-none">
             <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {data.text}
-            </div>
+              <ul className="space-y-4">
+              {data.text.map((point, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl shadow-sm bg-gray-50 hover:bg-blue-50 hover:shadow-md transition-all duration-200"
+                >
+                  <span className="shrink-0 w-8 h-8 bg-blue-100 text-blue-600 font-bold rounded-full flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                  <p className="text-gray-800 leading-relaxed font-medium">{point}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
@@ -62,6 +95,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+    </div>
     </div>
   );
 }
