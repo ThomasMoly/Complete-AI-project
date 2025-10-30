@@ -1,3 +1,4 @@
+import LinkTo from "@/componenets/LinkTo";
 import NavBar from "@/componenets/NavBar";
 import Link from "next/link";
 
@@ -38,6 +39,8 @@ export default function Home() {
     }
   ];
 
+
+
   return (
     <>
     <NavBar/>
@@ -53,12 +56,7 @@ export default function Home() {
           </p>
         </div>
         
-        <Link
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xl px-10 py-4 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-1 mb-20"
-          href='./pages/upload' 
-        >
-          Get Started
-        </Link>
+        <LinkTo/>
 
         {/* Features Section */}
         <div className="max-w-6xl w-full px-4">

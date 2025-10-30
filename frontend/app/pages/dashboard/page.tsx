@@ -14,8 +14,9 @@ export default async function DashboardPage() {
 
   // Determine color based on score
   const getScoreColor = (score: number) => {
-    if (score >= .80) return "bg-green-100 text-green-700 border-green-300";
-    if (score >= .60) return "bg-yellow-100 text-yellow-700 border-yellow-300";
+    if (score >= 80) return "bg-green-100 text-green-700 border-green-300";
+    if (score >= 60) return "bg-yellow-100 text-yellow-700 border-yellow-300";
+    if (score == 0) return "bg-gray-400 text-white text-bold"
     return "bg-red-100 text-red-700 border-red-300";
   };
 
@@ -36,8 +37,20 @@ export default async function DashboardPage() {
           {/* Match Score Badge */}
           {data.matched_score !== undefined && (
             <div className={`px-6 py-3 rounded-xl border-2 ${getScoreColor(data.matched_score)}`}>
-              <div className="text-sm font-medium opacity-80">Match Score</div>
-              <div className="text-3xl font-bold">{data.matched_score}%</div>
+              <div className="text-sm font-medium opacity-80">
+                {data.matched_score == 0 ? (
+                  <>
+                    No Job Description Found
+                  </>
+                ):
+                (
+                  <>
+                    Match Score
+                    <div className="text-3xl font-bold">{data.matched_score}%</div>
+                  </>
+                )
+              }
+              </div>
             </div>
           )}
         </div>

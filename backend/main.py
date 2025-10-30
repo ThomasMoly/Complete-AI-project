@@ -62,26 +62,29 @@ def remove_common_words_from_resume(resume_text, common_words):
     return cleaned_resume
 
 def extract_and_compare_semantic_gemini(resume_text, job_text):
-    resume_emb = [
-        np.array(e.values) for e in client.models.embed_content(
-        model="gemini-embedding-001", 
-        contents=resume_text
-    ).embeddings
-    ]
+    try:
+        resume_emb = [
+            np.array(e.values) for e in client.models.embed_content(
+            model="gemini-embedding-001", 
+            contents=resume_text
+        ).embeddings
+        ]
 
-    job_emb = [
-        np.array(e.values) for e in client.models.embed_content(
-        model="gemini-embedding-001",
-        contents=job_text
-    ).embeddings
-    ]
+        job_emb = [
+            np.array(e.values) for e in client.models.embed_content(
+            model="gemini-embedding-001",
+            contents=job_text
+        ).embeddings
+        ]
 
-    results = resume_emb + job_emb
-    
-    embeddings_matrix = np.array(results)
-    score = cosine_similarity(embeddings_matrix)
+        results = resume_emb + job_emb
+        
+        embeddings_matrix = np.array(results)
+        score = cosine_similarity(embeddings_matrix)
 
-    return score[0][1]
+        return score[0][1]
+    except:
+         return 0
 
 class ResultResponse(BaseModel):
     text: List[str]
@@ -149,7 +152,7 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...))
     temp_storage['text'] = suggestions
 
     temp_storage['text'] = suggestions
-    temp_storage['matched_score'] = match_score
+    temp_storage['matched_score'] = round(match_score, 4) * 100
 
     return {"filename": file.filename, "message": "Upload successful", "text": suggestions, "matched_score": match_score}
 
