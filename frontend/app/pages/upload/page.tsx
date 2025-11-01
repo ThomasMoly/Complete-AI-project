@@ -4,6 +4,10 @@ import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import uploadimg from "@/public/uploadimg.png";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { send_to_database } from "@/app/actions";
+
+
 
 const Page = () => {
   const fileInputReference = useRef<HTMLInputElement | null>(null);
@@ -12,6 +16,8 @@ const Page = () => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [jobPosting, setJobPosting] = useState("");
   const [resumeFile, setResumeFile] = useState<File | undefined>(undefined);
+  const {data: session} = useSession()
+
 
 
   const handleUpload = async (file: File | undefined) => {
@@ -20,23 +26,21 @@ const Page = () => {
       return;
     }
 
+    
+    const email = session?.user?.email;
+    const username = session?.user?.name;
+
     setIsUploading(true); // ✅ Start loader
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("job_posting", jobPosting);
-
+    formData.append("username", username ?? "")
+    formData.append("email", email ?? "")
+    
 
     try {
-      const response = await fetch("http://localhost:8000/upload/", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
+      const result = await send_to_database(formData)
       setIsUploading(false);
       router.push("./dashboard");
     } catch (error) {

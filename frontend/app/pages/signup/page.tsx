@@ -25,7 +25,7 @@ const Page = () => {
         {/* Sign In Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
           <button
-            onClick={() => signIn("google", { callbackUrl: "./pages/upload" })}
+            onClick={() => signIn("google", { callbackUrl: "/" })}
             className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-blue-400 transition-all duration-200 font-semibold text-gray-700 shadow-md hover:shadow-lg group"
           >
             <svg className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24">

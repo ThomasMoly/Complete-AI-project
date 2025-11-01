@@ -1,16 +1,25 @@
+import { authOptions } from "@/app/auth";
+import SideNav from "@/componenets/SideNav";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
 import Link from "next/link";
 
-interface ResultResponse {
-  text: string[];
-  matched_score: number;
-}
-
 export default async function DashboardPage() {
-  const res = await fetch("http://localhost:8000/results/", {
-    cache: "no-store",
-  }); 
+  const session = await getServerSession(authOptions)
 
-  const data: ResultResponse = await res.json();
+   if (!session?.user?.email) {
+    throw new Error("No user session found");
+  }
+
+  const res = await prisma.user.findUnique({
+    where: {email: session.user.email}
+  })
+
+  if (!res) {
+    throw new Error("User not found");
+  }
+
+  const { email, username, recommendations, score } = res;
 
   // Determine color based on score
   const getScoreColor = (score: number) => {
@@ -21,7 +30,8 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-white">
+    <div className="flex min-h-screen bg-linear-to-br from-blue-50 to-white">
+      <SideNav username = {username} email = {email}></SideNav>
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header Section with Score */}
         <div className="mb-8 flex items-start justify-between">
@@ -35,10 +45,10 @@ export default async function DashboardPage() {
           </div>
           
           {/* Match Score Badge */}
-          {data.matched_score !== undefined && (
-            <div className={`px-6 py-3 rounded-xl border-2 ${getScoreColor(data.matched_score)}`}>
+          {score !== undefined && (
+            <div className={`px-6 py-3 rounded-xl border-2 ${getScoreColor(score)}`}>
               <div className="text-sm font-medium opacity-80">
-                {data.matched_score == 0 ? (
+                {score == 0 ? (
                   <>
                     No Job Description Found
                   </>
@@ -46,7 +56,7 @@ export default async function DashboardPage() {
                 (
                   <>
                     Match Score
-                    <div className="text-3xl font-bold">{data.matched_score}%</div>
+                    <div className="text-3xl font-bold">{score}%</div>
                   </>
                 )
               }
@@ -81,7 +91,7 @@ export default async function DashboardPage() {
           <div className="prose prose-lg max-w-none">
             <div className="text-gray-700 leading-relaxed whitespace-pre-line">
               <ul className="space-y-4">
-              {data.text.map((point, i) => (
+              {recommendations.map((point, i) => (
                 <li
                   key={i}
                   className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl shadow-sm bg-gray-50 hover:bg-blue-50 hover:shadow-md transition-all duration-200"

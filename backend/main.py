@@ -92,7 +92,7 @@ class ResultResponse(BaseModel):
 
 app = FastAPI()
 
-temp_storage ={ 'text': [], 'matched_score' : ''}
+temp_storage ={ 'text': [], 'matched_score' : '', 'email': '', 'username': ''}
 
 origins = [
     "http://localhost:3000",
@@ -108,7 +108,7 @@ app.add_middleware(
 )
 
 @app.post("/upload/")
-async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...)):
+async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...), username: str = Form(...), email: str = Form(...)):
 
     text = ""
 
@@ -139,7 +139,24 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...))
 
     match_score = extract_and_compare_semantic_gemini(removed_common_words, removed_common_words_job_posting)
 
-    prompt = f"Analyze the following resume and give 5 actionable suggestions to make it more ATS-friendly but don't make each point too long. Use bullet points.\n\n{clean_text}. However, if there is a job posting, give more direct feedback on how the resume could improve relative to the job posting. \n\n {clean_job_posting}"
+    prompt = f"""
+    Analyze the following resume text and provide exactly 5 actionable suggestions 
+    to make it more ATS-friendly. 
+
+    If a job posting is provided, make at least 3 of the 5 suggestions specifically 
+    focused on improving the resume relative to that job posting.
+
+    Format each suggestion as:
+    • **Action:** [what to do]
+    • **Example:** [a brief, concrete example]
+
+    Resume:
+    {clean_text}
+
+    Job Posting (optional):
+    {clean_job_posting}
+    """
+
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
         contents=prompt,
@@ -153,8 +170,17 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...))
 
     temp_storage['text'] = suggestions
     temp_storage['matched_score'] = round(match_score, 4) * 100
+    temp_storage['email'] = email
+    temp_storage['username'] = username
 
-    return {"filename": file.filename, "message": "Upload successful", "text": suggestions, "matched_score": match_score}
+    return {
+        "filename": file.filename,
+        "message": "Upload successful",
+        "text": suggestions,
+        "matched_score": round(match_score, 4) * 100,
+        "email": email,
+        "username": username
+    }
 
 
 @app.get("/results/", response_model=ResultResponse)
