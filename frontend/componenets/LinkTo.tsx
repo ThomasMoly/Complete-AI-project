@@ -13,7 +13,7 @@ const LinkTo = async() => {
     >
       Get Started
     </Link>: 
-     <Link href={'./pages/upload' }
+     <Link href={'./pages/dashboard' }
         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xl px-10 py-4 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-1 mb-20"
       >
       Get Started</Link>
