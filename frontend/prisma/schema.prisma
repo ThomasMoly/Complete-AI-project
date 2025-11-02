@@ -20,4 +20,14 @@ model User{
   password String?
   recommendations String[] @default([])
   score Float
+  pastResumes PastResume[]  @relation("UserResumes")
+}
+
+model PastResume{
+  id Int @id @default(autoincrement())
+  recommendations String[] @default([])
+  score Float
+  user User @relation("UserResumes", fields: [userId], references: [id])
+  userId Int
+  createdAt DateTime @default(now())
 }

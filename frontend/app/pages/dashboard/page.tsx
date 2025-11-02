@@ -31,7 +31,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-linear-to-br from-blue-50 to-white">
-      <SideNav username = {username} email = {email}></SideNav>
+      <SideNav></SideNav>
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header Section with Score */}
         <div className="mb-8 flex items-start justify-between">
@@ -108,9 +108,7 @@ export default async function DashboardPage() {
 
         {/* Action Buttons */}
         <div className="mt-8 flex gap-4 justify-center">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg">
-            Download Report
-          </button>
+          
           <Link href="./upload"
             className="bg-white hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-lg shadow-md border border-gray-300 transition-all duration-200 hover:shadow-lg"
           >

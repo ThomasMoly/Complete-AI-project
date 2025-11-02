@@ -1,6 +1,9 @@
 "use server";
 
+import { getServerSession } from "next-auth";
 import { prisma } from "../lib/db";
+import { authOptions } from "./auth";
+
 
 export const send_to_database = async(formData: FormData) => {
       const response = await fetch("http://localhost:8000/upload/", {
@@ -14,7 +17,7 @@ export const send_to_database = async(formData: FormData) => {
 
       const data = await response.json()
 
-      const { email, username, matched_score, text } = data;
+      const { email, username, matched_score, text, id } = data;
 
     const current_user = await prisma.user.findUnique({
         where:{email: email}
@@ -33,6 +36,13 @@ export const send_to_database = async(formData: FormData) => {
         return new_user
     }
     else{
+        const update_resume = await prisma.pastResume.create({
+            data: {
+                userId: current_user.id,
+                score: matched_score,
+                recommendations: text,
+            }
+        })
        const updated_user = await prisma.user.update({
         where: { email },
         data: {
@@ -42,7 +52,27 @@ export const send_to_database = async(formData: FormData) => {
         },
         });
 
-        return updated_user;
+        return {updated_user, update_resume};
     }
     
 }
+
+export const get_Past_Resumes = async () => {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) {
+    throw new Error("No user found");
+  }
+
+  // Fetch the user with their past resumes in one query
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    include: { pastResumes: true }, // Prisma auto-resolves relation
+  });
+
+  if (!user) {
+    throw new Error("User not found in database");
+  }
+
+  return user.pastResumes; // Directly return related past resumes
+};

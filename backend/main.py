@@ -177,7 +177,7 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...),
         "filename": file.filename,
         "message": "Upload successful",
         "text": suggestions,
-        "matched_score": round(match_score, 4) * 100,
+        "matched_score": round(match_score * 100, 2) ,
         "email": email,
         "username": username
     }
