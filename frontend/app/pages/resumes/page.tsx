@@ -3,6 +3,15 @@ import { get_Past_Resumes } from '@/app/actions';
 import Link from 'next/link';
 import SideNav from '@/componenets/SideNav';
 
+type Resume = {
+   id: number;
+  score: number;
+  recommendations: string[];
+  userId: number;
+  createdAt: Date;
+};
+
+
 const Page = async () => {
   const resumes = await get_Past_Resumes();
 
@@ -29,9 +38,9 @@ const Page = async () => {
   };
 
   const totalResumes = resumes.length;
-  const analyzedResumes = resumes.filter(r => r.score > 0).length;
+  const analyzedResumes = resumes.filter((r: Resume) => r.score > 0).length;
   const averageScore = analyzedResumes > 0
-    ? Math.round(resumes.filter((r: any) => r.score > 0).reduce((acc, r) => acc + r.score, 0) / analyzedResumes)
+    ? Math.round(resumes.filter((r: Resume) => r.score > 0).reduce((acc, r) => acc + r.score, 0) / analyzedResumes)
     : 0;
 
   return (
