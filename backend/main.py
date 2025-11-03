@@ -9,10 +9,16 @@ from google import genai
 import re
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from dotenv import load_dotenv
+import os
 
+# Load environment variables from .env file
+load_dotenv()
 
+# Access your API key
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-client = genai.Client(api_key = "AIzaSyByAq7OTtdMQrZDEm2cxyOU-ao_Uo8_Co0")
+client = genai.Client(api_key = GOOGLE_API_KEY)
 
 def clean_and_split_feedback(generated_text: str):
     # Remove markdown bolds, bullets, and excessive whitespace
