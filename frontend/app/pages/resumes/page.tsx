@@ -31,7 +31,7 @@ const Page = async () => {
   const totalResumes = resumes.length;
   const analyzedResumes = resumes.filter(r => r.score > 0).length;
   const averageScore = analyzedResumes > 0
-    ? Math.round(resumes.filter(r => r.score > 0).reduce((acc, r) => acc + r.score, 0) / analyzedResumes)
+    ? Math.round(resumes.filter((r: any) => r.score > 0).reduce((acc, r) => acc + r.score, 0) / analyzedResumes)
     : 0;
 
   return (
