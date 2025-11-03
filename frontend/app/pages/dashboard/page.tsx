@@ -91,7 +91,7 @@ export default async function DashboardPage() {
           <div className="prose prose-lg max-w-none">
             <div className="text-gray-700 leading-relaxed whitespace-pre-line">
               <ul className="space-y-4">
-              {recommendations.map((point, i) => (
+              {recommendations.map((point: String, i: number) => (
                 <li
                   key={i}
                   className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl shadow-sm bg-gray-50 hover:bg-blue-50 hover:shadow-md transition-all duration-200"
