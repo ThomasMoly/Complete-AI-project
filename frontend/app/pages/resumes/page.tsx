@@ -135,7 +135,7 @@ const Page = async () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {resumes.map((r) => (
+              {resumes.map((r: Resume) => (
                 <div
                   key={r.id}
                   className={`bg-white rounded-xl shadow-md border-2 ${getScoreColor(r.score)} hover:shadow-xl transition-all duration-200 hover:-translate-y-1 overflow-hidden`}
