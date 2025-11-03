@@ -102,7 +102,8 @@ temp_storage ={ 'text': [], 'matched_score' : '', 'email': '', 'username': ''}
 
 origins = [
     "http://localhost:3000",
-
+    "complete-ai-project.vercel.app",
+    "complete-ai-project-git-main-thomasmolys-projects.vercel.app",
 ]
 
 app.add_middleware(
