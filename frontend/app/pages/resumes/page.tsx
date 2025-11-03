@@ -135,9 +135,9 @@ const Page = async () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {resumes.map((r: Resume) => (
+              {resumes.map((r: Resume, i: number) => (
                 <div
-                  key={r.id}
+                  key={i}
                   className={`bg-white rounded-xl shadow-md border-2 ${getScoreColor(r.score)} hover:shadow-xl transition-all duration-200 hover:-translate-y-1 overflow-hidden`}
                 >
                   <div className="p-6">
@@ -149,7 +149,7 @@ const Page = async () => {
                           </svg>
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-800 text-lg">Resume #{r.id}</h3>
+                          <h3 className="font-bold text-gray-800 text-lg">Resume #{i}</h3>
                           <p className="text-xs text-gray-500">PDF Document</p>
                         </div>
                       </div>
