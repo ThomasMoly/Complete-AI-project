@@ -1,7 +1,5 @@
-import { authOptions } from "@/app/auth";
 import SideNav from "@/componenets/SideNav";
 import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
 
 export default async function ResumeDetails({params} : {params: Promise<{id : number}>}) {

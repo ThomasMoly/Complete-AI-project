@@ -53,7 +53,7 @@ const Page = () => {
 
         {/* Features List */}
         <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200 shadow-md">
-          <h3 className="font-semibold text-gray-800 mb-4 text-center">What you'll get:</h3>
+          <h3 className="font-semibold text-gray-800 mb-4 text-center">What you&apos;ll get:</h3>
           <ul className="space-y-3">
             <li className="flex items-start gap-3">
               <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">

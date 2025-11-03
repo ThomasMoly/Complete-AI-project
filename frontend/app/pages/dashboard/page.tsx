@@ -19,7 +19,7 @@ export default async function DashboardPage() {
     throw new Error("User not found");
   }
 
-  const { email, username, recommendations, score } = res;
+  const { recommendations, score } = res;
 
   // Determine color based on score
   const getScoreColor = (score: number) => {

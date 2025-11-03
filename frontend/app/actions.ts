@@ -17,7 +17,7 @@ export const send_to_database = async(formData: FormData) => {
 
       const data = await response.json()
 
-      const { email, username, matched_score, text, id } = data;
+      const { email, username, matched_score, text } = data;
 
     const current_user = await prisma.user.findUnique({
         where:{email: email}
