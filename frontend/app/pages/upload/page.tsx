@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import uploadimg from "@/public/uploadimg.png";
 import Image from "next/image";
@@ -16,9 +16,13 @@ const Page = () => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [jobPosting, setJobPosting] = useState("");
   const [resumeFile, setResumeFile] = useState<File | undefined>(undefined);
-  const {data: session} = useSession()
+  const {data: session, status} = useSession()
 
-
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/signup");
+    }
+  }, [status, router]);
 
   const handleUpload = async (file: File | undefined) => {
     if (!file) {

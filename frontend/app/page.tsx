@@ -1,6 +1,5 @@
 import LinkTo from "@/componenets/LinkTo";
 import NavBar from "@/componenets/NavBar";
-import Link from "next/link";
 
 export default function Home() {
   const features = [
@@ -105,12 +104,7 @@ export default function Home() {
           <p className="text-blue-100 text-lg mb-6">
             Get ahead of thousands of job seekers by improving your chances with ResumeRater
           </p>
-          <Link
-            href='./pages/upload'
-            className="inline-block bg-white text-blue-600 font-semibold text-lg px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
-          >
-            Upload Your Resume Now
-          </Link>
+          <LinkTo/>
         </div>
       </div>
     </div>
