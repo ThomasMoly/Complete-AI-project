@@ -20,7 +20,7 @@ const Page = () => {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("./pages/signup");
+      router.push("./signup");
     }
   }, [status, router]);
 
