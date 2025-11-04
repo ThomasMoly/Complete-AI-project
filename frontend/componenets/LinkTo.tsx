@@ -1,4 +1,4 @@
-"user server"
+"use server"
 
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
