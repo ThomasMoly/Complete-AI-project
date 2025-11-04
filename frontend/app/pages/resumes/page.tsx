@@ -149,7 +149,7 @@ const Page = async () => {
                           </svg>
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-800 text-lg">Resume #{i}</h3>
+                          <h3 className="font-bold text-gray-800 text-lg">Resume #{i+1}</h3>
                           <p className="text-xs text-gray-500">PDF Document</p>
                         </div>
                       </div>
