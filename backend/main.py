@@ -104,6 +104,7 @@ origins = [
     "http://localhost:3000",
     "complete-ai-project.vercel.app",
     "complete-ai-project-git-main-thomasmolys-projects.vercel.app",
+    "https://resumater.vercel.app/",
 ]
 
 app.add_middleware(
