@@ -148,21 +148,34 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...),
     match_score = extract_and_compare_semantic_gemini(removed_common_words, removed_common_words_job_posting)
 
     prompt = f"""
-    Analyze the following resume text and provide exactly 5 actionable suggestions 
-    to make it more ATS-friendly. 
+        You are an expert resume reviewer trained in industry hiring practices and ATS optimization. 
+        Analyze the following resume and (if provided) the related job posting.
 
-    If a job posting is provided, make at least 3 of the 5 suggestions specifically 
-    focused on improving the resume relative to that job posting.
+        Your goal is to:
+        1. Review each bullet point and rewrite any that lack clarity, measurable impact, or strong action verbs 
+        using the Google-recommended format: 
+        **"Used [X] to accomplish [Y], resulting in [Z] measurable impact."**
+        If a bullet is already strong, leave it as-is.
+        2. Identify missing or weak bullet points that should be added to better highlight the candidate’s 
+        accomplishments or align with the job posting.
+        3. Provide exactly **5 actionable suggestions** to make the resume more ATS-friendly.
+        - If a job posting is provided, ensure at least **3 of the 5** suggestions directly address 
+            improvements for alignment with that job description.
+     
+        Format your response as follows:
+        ---
+        **1. Bullet Point Improvements**
+        [List original → improved versions, if applicable]
 
-    Format each suggestion as:
-    • **Action:** [what to do]
-    • **Example:** [a brief, concrete example]
+        **2. Actionable Suggestions (5 total)**
+        • **Action:** [what to do]  
+        • **Example:** [a brief, concrete example]
 
-    Resume:
-    {clean_text}
+        Resume:
+        {clean_text}
 
-    Job Posting (optional):
-    {clean_job_posting}
+        Job Posting (optional):
+        {clean_job_posting}
     """
 
     response = client.models.generate_content(
