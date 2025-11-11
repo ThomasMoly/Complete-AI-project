@@ -12,7 +12,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 import os
 from sklearn.metrics.pairwise import cosine_similarity
-from keybert import KeyBERT
 import math
 
 
@@ -96,11 +95,6 @@ def extract_and_compare_semantic_gemini(resume_text, job_text):
         return score[0][1]
     except:
          return 0
-    
-def find_extract_key_words(job_text, top_n = 30):
-    model = KeyBERT()
-    job_keywords = model.extract_keywords(job_text, keyphrase_ngram_range=(1,2), stop_words='english', top_n=top_n, use_mmr=True, diversity=0.6)
-    return job_keywords
 
 
 def display_score(x):
