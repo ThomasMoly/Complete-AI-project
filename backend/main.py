@@ -11,6 +11,10 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 import os
+from sklearn.metrics.pairwise import cosine_similarity
+from keybert import KeyBERT
+import math
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -19,6 +23,7 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 client = genai.Client(api_key = GOOGLE_API_KEY)
+
 
 def clean_and_split_feedback(generated_text: str):
     # Remove markdown bolds, bullets, and excessive whitespace
@@ -91,14 +96,24 @@ def extract_and_compare_semantic_gemini(resume_text, job_text):
         return score[0][1]
     except:
          return 0
+    
+def find_extract_key_words(job_text, top_n = 30):
+    model = KeyBERT()
+    job_keywords = model.extract_keywords(job_text, keyphrase_ngram_range=(1,2), stop_words='english', top_n=top_n, use_mmr=True, diversity=0.6)
+    return job_keywords
+
+
+def display_score(x):
+    adjusted = 1 / (1 + math.exp(-10*(x - 0.5)))
+    return round(adjusted * 100, 2)
+
+
 
 class ResultResponse(BaseModel):
     text: List[str]
     matched_score: float | None = None
 
 app = FastAPI()
-
-temp_storage ={ 'text': [], 'matched_score' : '', 'email': '', 'username': ''}
 
 origins = [
     "http://localhost:3000",
@@ -145,11 +160,11 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...),
 
     removed_common_words_job_posting = remove_common_words_from_resume(clean_job_posting, words_set)
 
-    match_score = extract_and_compare_semantic_gemini(removed_common_words, removed_common_words_job_posting)
+    score = extract_and_compare_semantic_gemini(removed_common_words, removed_common_words_job_posting)
 
     prompt = f"""
     Analyze the following resume text and provide exactly 5 actionable suggestions 
-    to make it more ATS-friendly. 
+    to make it more ATS-friendly.
 
     If a job posting is provided, make at least 3 of the 5 suggestions specifically 
     focused on improving the resume relative to that job posting.
@@ -174,26 +189,19 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...),
 
     suggestions = clean_and_split_feedback(generated_text)
 
-    temp_storage['text'] = suggestions
+    match_score = score
 
-    temp_storage['text'] = suggestions
-    temp_storage['matched_score'] = round(match_score, 4) * 100
-    temp_storage['email'] = email
-    temp_storage['username'] = username
+    print(match_score)
 
     return {
         "filename": file.filename,
         "message": "Upload successful",
         "text": suggestions,
-        "matched_score": round(match_score * 100, 2) ,
+        "matched_score": display_score(match_score),
         "email": email,
         "username": username
     }
 
-
-@app.get("/results/", response_model=ResultResponse)
-async def result_text():
-    return temp_storage
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
