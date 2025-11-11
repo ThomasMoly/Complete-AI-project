@@ -6,7 +6,7 @@ import { authOptions } from "./auth";
 
 
 export const send_to_database = async(formData: FormData) => {
-      const response = await fetch("https://complete-ai-project.onrender.com/upload/", {
+      const response = await fetch("https://complete-ai-project.onrender.com/upload", {
         method: "POST",
         body: formData,
       });

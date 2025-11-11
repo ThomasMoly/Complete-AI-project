@@ -124,7 +124,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-@app.post("/upload/")
+@app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...), username: str = Form(...), email: str = Form(...)):
 
     text = ""
