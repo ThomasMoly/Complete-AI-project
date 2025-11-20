@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import uploadimg from "@/public/uploadimg.png";
+import checkImg from "@/public/checkmark.png"
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { send_to_database } from "@/app/actions";
@@ -24,12 +25,20 @@ const Page = () => {
     }
   }, [status, router]);
 
+  const uploaded = async (file: File | undefined) => {
+    if (!file){
+      return uploadimg
+    }
+    else{
+      return checkImg
+    }
+  }
+
   const handleUpload = async (file: File | undefined) => {
     if (!file) {
       console.error("No file selected");
       return;
     }
-
     
     const email = session?.user?.email;
     const username = session?.user?.name;
@@ -109,20 +118,23 @@ const Page = () => {
                     <p className="text-gray-500 text-sm mt-2">{fileName}</p>
                   )}
                 </div>
-              ) : (
+              ) : ( 
                 <>
-                  <div className="flex justify-center mb-3">
+                  {resumeFile ? (
+                    <Image
+                      src={checkImg} // or whatever “file uploaded” icon you want
+                      alt="uploaded"
+                      width={80}
+                      className="opacity-80"
+                    />
+                  ) : (
                     <Image
                       src={uploadimg}
                       alt="upload"
                       width={80}
                       className="opacity-80"
                     />
-                  </div>
-                  <p className="text-gray-700 font-semibold mb-1">
-                    Click to upload
-                  </p>
-                  <p className="text-gray-500 text-xs">PDF, DOC, DOCX</p>
+                  )}
                 </>
               )}
             </div>

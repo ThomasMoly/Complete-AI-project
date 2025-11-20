@@ -47,7 +47,7 @@ const NavBar = () => {
             </li>
             <li>
               <Link 
-                href='./pages/login'
+                href='./pages/signup'
                 className="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 rounded-lg hover:bg-blue-50"
               >
                 Login
