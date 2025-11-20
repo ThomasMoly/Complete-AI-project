@@ -120,21 +120,27 @@ const Page = () => {
                 </div>
               ) : ( 
                 <>
-                  {resumeFile ? (
-                    <Image
-                      src={checkImg} // or whatever “file uploaded” icon you want
-                      alt="uploaded"
-                      width={80}
-                      className="opacity-80"
-                    />
-                  ) : (
-                    <Image
-                      src={uploadimg}
-                      alt="upload"
-                      width={80}
-                      className="opacity-80"
-                    />
-                  )}
+                  <div className="flex justify-center mb-3">
+                    {resumeFile ? (
+                      <Image
+                        src={checkImg} // or whatever “file uploaded” icon you want
+                        alt="uploaded"
+                        width={80}
+                        className="opacity-80"
+                      />
+                    ) : (
+                      <Image
+                        src={uploadimg}
+                        alt="upload"
+                        width={80}
+                        className="opacity-80"
+                      />
+                    )}
+                  </div>
+                  <p className="text-gray-700 font-semibold mb-1">
+                    Click to upload
+                  </p>
+                  <p className="text-gray-500 text-xs">PDF, DOC, DOCX</p>
                 </>
               )}
             </div>
