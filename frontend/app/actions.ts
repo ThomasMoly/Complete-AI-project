@@ -17,7 +17,7 @@ export const send_to_database = async(formData: FormData) => {
 
       const data = await response.json()
 
-      const { email, username, matched_score, text } = data;
+      const { email, username, matched_score, text, current_resume } = data;
 
     const current_user = await prisma.user.findUnique({
         where:{email: email}
@@ -30,6 +30,7 @@ export const send_to_database = async(formData: FormData) => {
                 username,
                 score: matched_score,
                 recommendations: text,
+                currentResumes: current_resume,
             }
         })
         
@@ -49,6 +50,7 @@ export const send_to_database = async(formData: FormData) => {
             score: matched_score,
             recommendations: text,
             username, // keep their display name synced
+            currentResumes: current_resume
         },
         });
 
@@ -76,3 +78,19 @@ export const get_Past_Resumes = async () => {
 
   return user.pastResumes; // Directly return related past resumes
 };
+
+export const get_Current_Resume = async() => {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) {
+    throw new Error("No user found");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  const current_resume = user?.currentResumes || null
+
+  return current_resume
+}

@@ -6,7 +6,7 @@ import uploadimg from "@/public/uploadimg.png";
 import checkImg from "@/public/checkmark.png"
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { send_to_database } from "@/app/actions";
+import { get_Current_Resume, send_to_database } from "@/app/actions";
 
 
 
@@ -18,6 +18,7 @@ const Page = () => {
   const [jobPosting, setJobPosting] = useState("");
   const [resumeFile, setResumeFile] = useState<File | undefined>(undefined);
   const {data: session, status} = useSession()
+  const [current_Resume, set_Current_Resume] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -25,20 +26,16 @@ const Page = () => {
     }
   }, [status, router]);
 
-  const uploaded = async (file: File | undefined) => {
-    if (!file){
-      return uploadimg
-    }
-    else{
-      return checkImg
+  const get_Resume = async() => {
+    const resume = await get_Current_Resume();  // get fresh data
+
+    set_Current_Resume(resume)
+    if (current_Resume == null){
+      throw new Error("No resume found")
     }
   }
 
   const handleUpload = async (file: File | undefined) => {
-    if (!file) {
-      console.error("No file selected");
-      return;
-    }
     
     const email = session?.user?.email;
     const username = session?.user?.name;
@@ -46,11 +43,13 @@ const Page = () => {
     setIsUploading(true); // ✅ Start loader
 
     const formData = new FormData();
-    formData.append("file", file);
+    if (file) {
+      formData.append("file", file);
+    }
     formData.append("job_posting", jobPosting);
     formData.append("username", username ?? "")
     formData.append("email", email ?? "")
-    
+    formData.append("resume_info", current_Resume ?? "")
 
     try {
       const result = await send_to_database(formData)
@@ -121,7 +120,7 @@ const Page = () => {
               ) : ( 
                 <>
                   <div className="flex justify-center mb-3">
-                    {resumeFile ? (
+                    {resumeFile || current_Resume ? (
                       <Image
                         src={checkImg} // or whatever “file uploaded” icon you want
                         alt="uploaded"
@@ -146,13 +145,30 @@ const Page = () => {
             </div>
 
             {!isUploading && (
-              <button
-                type="button"
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition-all duration-200"
-                onClick={() => fileInputReference.current?.click()}
-              >
-                Choose Resume
-              </button>
+              <>
+              <div className="flex gap-4 mt-4">
+                <button
+                  type="button"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg"
+                  onClick={() => fileInputReference.current?.click()}
+                >
+                  Choose Resume
+                </button>
+                
+                <button
+                  type="button"
+                  className="flex-1 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-lg shadow-md border-2 border-gray-300 transition-all duration-200 hover:shadow-lg"
+                  onClick={() => get_Resume()}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Use Existing
+                  </div>
+                </button>
+              </div>
+            </>
             )}
           </div>
 

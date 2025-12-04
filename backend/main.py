@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import os
 from sklearn.metrics.pairwise import cosine_similarity
 import math
+from typing import Optional
 
 
 # Load environment variables from .env file
@@ -125,15 +126,17 @@ app.add_middleware(
 )
 
 @app.post("/upload")
-async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...), username: str = Form(...), email: str = Form(...)):
+async def upload_pdf(file: Optional[UploadFile] = File(None), job_posting: str = Form(...), username: str = Form(...), email: str = Form(...), resume_info: str = Form(...)):
 
     text = ""
 
-    contents = await file.read()  # read file into memory
-    text = ""
-    doc = fitz.open(stream=contents, filetype="pdf")
-    for page in doc:
-        text = page.get_text()
+    if not resume_info:
+        contents = await file.read()  # read file into memory
+        with fitz.open(stream=contents, filetype="pdf") as doc:
+            for page in doc:
+                text = page.get_text()
+    else:
+        text = resume_info
 
     clean_text = (
         text.replace("\n", " ")        # remove newlines
@@ -188,12 +191,12 @@ async def upload_pdf(file: UploadFile = File(...), job_posting: str = Form(...),
     print(match_score)
 
     return {
-        "filename": file.filename,
         "message": "Upload successful",
         "text": suggestions,
         "matched_score": display_score(match_score),
         "email": email,
-        "username": username
+        "username": username,
+        "current_resume": clean_text
     }
 
 
